@@ -5,7 +5,7 @@ import datetime
 
 from MNIST_Model import *
 
-NUM_EPOCHS = 10
+NUM_EPOCHS = 20
 BATCH_SIZE = 32
 
 def main():
@@ -29,7 +29,7 @@ def main():
     # Initialize model.
     #
     model = MNIST_Model()
-    model.build(input_shape=(None, 28, 28, 1))
+    model.build(input_shape=(None, 32, 32, 1))
     model.summary()
 
     #
@@ -109,6 +109,8 @@ def prepare_data(dataset):
 
     #Sloppy input normalization, just bringing image values from range [0, 255] to [-1, 1]
     dataset = dataset.map(lambda img, target: ( (img/128.)-1., target ) )
+
+    dataset = dataset.map(lambda img, target: (tf.image.resize(img, [32,32]), target) )
 
     # One hot target
     dataset = dataset.map(lambda img, target: (img, tf.one_hot(target, depth=10)))

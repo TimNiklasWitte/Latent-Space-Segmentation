@@ -5,21 +5,30 @@ sys.path.append("./MNIST Model")
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
+import argparse
 
 from Autoencoder import *
 from MNIST_Model import *
 
 from matplotlib.patches import Patch
 
-
 def main():
+
+    parser = argparse.ArgumentParser(description="Visualize the latent space segmentation")
+    parser.add_argument("--path", help="Path where the latent space segmentation map (image) shall be stored.", required=True)
+    parser.add_argument("--show", help="Display the latent space segmentation map", default=False, required=False)
+    args = parser.parse_args()
+
+    path = args.path
+    show = args.show 
+
     autoencoder = Autoencoder()
     autoencoder.build(input_shape=(None, 32, 32, 1))
-    autoencoder.load_weights("./Autoencoder/saved_models/trained_weights_10").expect_partial()
+    autoencoder.load_weights("./Autoencoder/saved_models/trained_weights_20").expect_partial()
    
     mnist_model = MNIST_Model()
-    mnist_model.build(input_shape=(None, 28, 28, 1))
-    mnist_model.load_weights("./MNIST Model/saved_models/trained_weights_10").expect_partial()
+    mnist_model.build(input_shape=(None, 32, 32, 1))
+    mnist_model.load_weights("./MNIST Model/saved_models/trained_weights_20").expect_partial()
 
     num_points = 200
     coordinates = np.linspace(-1, 1, num_points)
@@ -32,17 +41,17 @@ def main():
     embeddings = tf.convert_to_tensor(embedding_list)
     
     imgs = autoencoder.decoder(embeddings)
-    imgs = tf.image.resize(imgs, [32,32])
-
-    #imgs = tf.reshape(imgs, shape=(num_points,num_points, 32, 32, 1))
-
+   
     preds = mnist_model(imgs)
     preds = tf.argmax(preds, axis=-1)
 
-    preds = tf.reshape(preds, shape=(num_points, num_points))
-    print(preds)
-    #X, Y = np.meshgrid(x, y)
+    labels = tf.reshape(preds, shape=(num_points, num_points))
+    print(labels)
+    visualize_segmentation(labels, path, show)
 
+
+def visualize_segmentation(labels, path=None, show=False):
+    
     colors = np.array([
         [0,0,0], # black
         [128, 128, 128], # white
@@ -56,12 +65,12 @@ def main():
         [128, 128, 0], # brown
     ])
 
-    latent_space_segmentation = colors[preds] 
+    latent_space_segmentation = colors[labels] 
     plt.imshow(latent_space_segmentation, extent =[-1,1,-1, 1])
     plt.xlabel("x")
     plt.ylabel("y")
-    plt.legend()
-
+    
+    # Legend: Add colors manually
     ax = plt.legend().axes
     handles, labels = ax.get_legend_handles_labels()
 
@@ -77,8 +86,12 @@ def main():
     lgd = ax.legend(handles=patches_list, loc='lower right', bbox_to_anchor=(1.24, 0.3))
 
     plt.tight_layout()
-    plt.savefig("latent_space_segmentation.png")
-    plt.show()
+
+    if path:
+        plt.savefig(path)
+    
+    if show:
+        plt.show()
 if __name__ == "__main__":
     try:
         main()

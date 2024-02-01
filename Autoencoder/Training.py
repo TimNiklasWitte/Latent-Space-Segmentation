@@ -5,7 +5,7 @@ import datetime
 
 from Autoencoder import *
 
-NUM_EPOCHS = 10
+NUM_EPOCHS = 20
 BATCH_SIZE = 32
 
 def main():

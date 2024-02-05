@@ -51,10 +51,27 @@ def main():
 
 
 def visualize_segmentation(labels, path=None, show=False):
-    
+    """
+    Display the label array as an image: A label at position (x, y) is considered 
+    as a pixel. Its color depends on the label:
+    0 - black
+    1 - gray
+    2 - red
+    3 - green
+    4 - blue
+    5 - yellow
+    6 - magenta
+    7 - cyan
+    8 - brown
+    9 - olive
+
+    @param labels: Array of labels (2D array of integers)
+    @param path: Path where this plot/figure shall be stored
+    @param show: Show the plot, if true -> show the plot, otherwise no
+    """
     colors = np.array([
         [0,0,0], # black
-        [128, 128, 128], # white
+        [128, 128, 128], # gray
         [255, 0, 0], # red
         [0, 255, 0], # green
         [0, 0, 255], # blue
@@ -62,7 +79,7 @@ def visualize_segmentation(labels, path=None, show=False):
         [255, 0, 255], # magenta
         [0, 255, 255], # cyan
         [128, 0, 0], # brown
-        [128, 128, 0], # brown
+        [128, 128, 0], # olive
     ])
 
     latent_space_segmentation = colors[labels] 
